@@ -1,9 +1,9 @@
 rwildcard = $(foreach d, $(wildcard $1*), $(filter $(subst *, %, $2), $d) $(call rwildcard, $d/, $2))
 
-CC := arm-none-eabi-gcc
-AS := arm-none-eabi-as
-LD := arm-none-eabi-ld
-OC := arm-none-eabi-objcopy
+CC := $(DEVKITARM)/bin/arm-none-eabi-gcc
+AS := $(DEVKITARM)/bin/arm-none-eabi-as
+LD := $(DEVKITARM)/bin/arm-none-eabi-ld
+OC := $(DEVKITARM)/bin/arm-none-eabi-objcopy
 OPENSSL := openssl
 
 PYTHON3 := python
