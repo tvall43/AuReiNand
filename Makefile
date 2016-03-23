@@ -4,25 +4,16 @@ CC := $(DEVKITARM)/bin/arm-none-eabi-gcc
 AS := $(DEVKITARM)/bin/arm-none-eabi-as
 LD := $(DEVKITARM)/bin/arm-none-eabi-ld
 OC := $(DEVKITARM)/bin/arm-none-eabi-objcopy
-OPENSSL := openssl
-
-PYTHON3 := python
-PYTHON_VER_MAJOR := $(word 2, $(subst ., , $(shell python --version 2>&1)))
-ifneq ($(PYTHON_VER_MAJOR), 3)
-	PYTHON3 := py -3
-endif
 
 name := AuReiNand
 
 dir_source := source
-dir_data := data
-dir_build := build
-dir_mset := CakeHax
-dir_out := out
-dir_emu := emunand
-dir_reboot := reboot
-dir_ninjhax := CakeBrah
+dir_patches := patches
 dir_loader := loader
+dir_mset := CakeHax
+dir_ninjhax := CakeBrah
+dir_build := build
+dir_out := out
 
 ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
 CFLAGS := -Wall -Wextra -MMD -MP -marm $(ASFLAGS) -fno-builtin -fshort-wchar -std=c11 -Wno-main -O2 -ffast-math
@@ -34,7 +25,7 @@ objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 
 
 .PHONY: all
-all: launcher a9lh emunand reboot ninjhax loader
+all: launcher a9lh ninjhax
 
 .PHONY: launcher
 launcher: $(dir_out)/$(name).dat 
@@ -42,17 +33,8 @@ launcher: $(dir_out)/$(name).dat
 .PHONY: a9lh
 a9lh: $(dir_out)/arm9loaderhax.bin
 
-.PHONY: emunand
-emunand: $(dir_out)/aurei/patches/emunand.bin
-
-.PHONY: reboot
-reboot: $(dir_out)/aurei/patches/reboot.bin
-
 .PHONY: ninjhax
 ninjhax: $(dir_out)/3ds/$(name)
-
-.PHONY: loader
-loader: $(dir_out)/aurei/loader.bin
 
 .PHONY: clean
 clean:
@@ -61,36 +43,33 @@ clean:
 	@rm -rf $(dir_out) $(dir_build)
 	@$(MAKE) -C $(dir_loader) clean
 
-$(dir_out)/$(name).dat: $(dir_build)/main.bin $(dir_out)/aurei
-	@$(MAKE) $(FLAGS) -C $(dir_mset) launcher
-	dd if=$(dir_build)/main.bin of=$@ bs=512 seek=144
+$(dir_out):
+	@mkdir -p "$(dir_out)/aurei/payloads"
 
-$(dir_out)/arm9loaderhax.bin: $(dir_build)/main.bin $(dir_out)/aurei
+$(dir_out)/$(name).dat: $(dir_build)/main.bin $(dir_out)
+	@$(MAKE) $(FLAGS) -C $(dir_mset) launcher
+	@dd if=$(dir_build)/main.bin of=$@ bs=512 seek=144
+
+$(dir_out)/arm9loaderhax.bin: $(dir_build)/main.bin $(dir_out)
 	@cp -av $(dir_build)/main.bin $@
 
-$(dir_out)/3ds/$(name):
+$(dir_out)/3ds/$(name): $(dir_out)
 	@mkdir -p "$(dir_out)/3ds/$(name)"
 	@$(MAKE) $(FLAGS) -C $(dir_ninjhax)
 	@mv $(dir_out)/$(name).3dsx $@
 	@mv $(dir_out)/$(name).smdh $@
 
-$(dir_out)/aurei:
-	@mkdir -p "$(dir_out)/aurei"
-
-$(dir_out)/aurei/patches:
-	@mkdir -p "$(dir_out)/aurei/patches"
-
-$(dir_out)/aurei/patches/emunand.bin: $(dir_emu)/emuCode.s $(dir_out)/aurei/patches
+$(dir_build)/patches.h: $(dir_patches)/emunand.s $(dir_patches)/reboot.s
+	@mkdir -p "$(dir_build)"
 	@armips $<
-	@mv emunand.bin $@
+	@armips $(word 2,$^)
+	@mv emunand.bin reboot.bin $(dir_build)
+	@bin2c -o $@ -n emunand $(dir_build)/emunand.bin -n reboot $(dir_build)/reboot.bin
 
-$(dir_out)/aurei/patches/reboot.bin: $(dir_reboot)/rebootCode.s $(dir_out)/aurei/patches
-	@armips $<
-	@mv reboot.bin $@
-
-$(dir_out)/aurei/loader.bin: $(dir_out)/aurei $(dir_loader)/Makefile
+$(dir_build)/loader.h: $(dir_loader)/Makefile
 	@$(MAKE) -C $(dir_loader)
-	@mv $(dir_loader)/loader.bin $@
+	@mv $(dir_loader)/loader.bin $(dir_build)
+	@bin2c -o $@ -n loader $(dir_build)/loader.bin
 
 $(dir_build)/main.bin: $(dir_build)/main.elf
 	$(OC) -S -O binary $< $@
@@ -99,7 +78,7 @@ $(dir_build)/main.elf: $(objects_cfw)
 	# FatFs requires libgcc for __aeabi_uidiv
 	$(CC) -nostartfiles $(LDFLAGS) -T linker.ld $(OUTPUT_OPTION) $^
 
-$(dir_build)/%.o: $(dir_source)/%.c
+$(dir_build)/%.o: $(dir_source)/%.c $(dir_build)/patches.h $(dir_build)/loader.h
 	@mkdir -p "$(@D)"
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
