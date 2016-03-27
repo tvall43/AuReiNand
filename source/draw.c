@@ -10,6 +10,8 @@
 #include "fs.h"
 #include "memory.h"
 #include "font.h"
+#include "utils.h"
+
 
 #define SCREEN_TOP_WIDTH 400
 #define SCREEN_TOP_HEIGHT 240
@@ -93,7 +95,17 @@ void drawMenuHaxCrash() {
 
 void loadSplash(void){
     clearScreens();
-    drawMenuHaxCrash();
+
+    const char configPath[] = "aurei/config.bin";
+    u16 config = 0;
+    u32 needConfig = fileRead(&config, configPath, 2) ? 1 : 2;
+
+
+
+    if(config >> 3) {
+
+        drawMenuHaxCrash();
+    }
     //Don't delay boot if no splash image is on the SD
     if(fileRead(fb->top_left, "/aurei/splash.bin", 0x46500) +
        fileRead(fb->bottom, "/aurei/splashbottom.bin", 0x38400)){

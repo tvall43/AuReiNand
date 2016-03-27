@@ -12,7 +12,7 @@
 #include "buttons.h"
 
 //Number of options that can be configured
-#define OPTIONS 3
+#define OPTIONS 4
 
 #define COLOR_TITLE    0xFF9900
 #define COLOR_WHITE    0xFFFFFF
@@ -55,6 +55,7 @@ void configureCFW(const char *configPath){
     options.text[0] = "( ) Updated SysNAND mode (A9LH-only)";
     options.text[1] = "( ) Use pre-patched FIRMs";
     options.text[2] = "( ) Force A9LH detection";
+    options.text[3] = "( ) menuhax emulation";
 
     initScreens();
 
