@@ -328,22 +328,24 @@ void patchCode(u64 progId, u8 *code, u32 size)
         case 0x000400300000A902LL: // KOR Menu
         case 0x000400300000B102LL: // TWN Menu
         {
-            static const u8 regionFreePattern[] = {
-                0x00, 0x00, 0x55, 0xE3, 0x01, 0x10, 0xA0, 0xE3
-            };
-            static const u8 regionFreePatch[] = {
-                0x01, 0x00, 0xA0, 0xE3, 0x1E, 0xFF, 0x2F, 0xE1
-            };
+			if(CONFIG(6)){
+				static const u8 regionFreePattern[] = {
+					0x00, 0x00, 0x55, 0xE3, 0x01, 0x10, 0xA0, 0xE3
+				};
+				static const u8 regionFreePatch[] = {
+					0x01, 0x00, 0xA0, 0xE3, 0x1E, 0xFF, 0x2F, 0xE1
+				};
 
-            //Patch SMDH region checks
-            patchMemory(code, size, 
-                regionFreePattern, 
-                sizeof(regionFreePattern), -16, 
-                regionFreePatch, 
-                sizeof(regionFreePatch), 1
-            );
+				//Patch SMDH region checks
+				patchMemory(code, size, 
+					regionFreePattern, 
+					sizeof(regionFreePattern), -16, 
+					regionFreePatch, 
+					sizeof(regionFreePatch), 1
+				);
 
-            break;
+				break;
+			}
         }
 
         case 0x0004013000002C02LL: // NIM
@@ -435,15 +437,17 @@ void patchCode(u64 progId, u8 *code, u32 size)
             static const u8 stopCartUpdatesPatch[] = {
                 0x0B, 0x18, 0x21, 0xC8
             };
-
-            //Disable updates from foreign carts (makes carts region-free)
-            patchMemory(code, size, 
-                stopCartUpdatesPattern, 
-                sizeof(stopCartUpdatesPattern), 0, 
-                stopCartUpdatesPatch,
-                sizeof(stopCartUpdatesPatch), 2
-            );
-
+			
+			if(CONFIG(6)) {
+				//Disable updates from foreign carts (makes carts region-free)
+				patchMemory(code, size, 
+					stopCartUpdatesPattern, 
+					sizeof(stopCartUpdatesPattern), 0, 
+					stopCartUpdatesPatch,
+					sizeof(stopCartUpdatesPatch), 2
+				);
+			}
+			
             u32 cpuSetting = MULTICONFIG(1);
 
             if(cpuSetting)

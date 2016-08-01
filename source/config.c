@@ -44,7 +44,7 @@ void configureCFW(const char *configPath)
                                         "( ) Enable region/language emu. and ext. .code",
                                         "( ) Show current NAND in System Settings",
                                         "( ) Show GBA boot screen in patched AGB_FIRM",
-                                        "( ) Enable splash screen with no screen-init" };
+                                        "( ) Region free"};
 
     struct multiOption {
         int posXs[4];
