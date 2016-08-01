@@ -47,7 +47,8 @@ void configureCFW(const char *configPath)
                                         "( ) Region free",
 										"( ) Try to block mandatory updates",
 										"( ) SecureInfo: sigpatch + use _C if available",
-										"( ) Verbose errors (ErrDisp)"};
+										"( ) Verbose errors (ErrDisp)",
+										"( ) Force TestMenu as Home launcher"};
 
     struct multiOption {
         int posXs[4];

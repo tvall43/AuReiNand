@@ -452,6 +452,27 @@ void patchCode(u64 progId, u8 *code, u32 size)
 				);
 			}
 			
+			if(CONFIG(10)) {
+			// Force HOME Menu TID = TestMenu
+				static const u8 forceHOMEMenuTIDPattern[] = {
+					/* ldr r0, =0x101 */
+					0xbc, 0x00, 0x9f, 0xe5,
+					/* bl getRegionSpecificAppID */
+					0x52, 0x45, 0x00, 0xeb
+				};
+				static const u8 forceHOMEMenuTIDPatch[] = {
+					/* mov r0, r9 (== 0x00008102) */
+					0x09, 0x10, 0xa0, 0xe1,
+					/* mov r1, r8 (== 0x00040030) */
+					0x08, 0x00, 0xa0, 0xe1
+				}
+				
+				patchMemory(code, size,
+					forceHOMEMenuTIDPattern, sizeof(forceHOMEMenuTIDPattern), 0,
+					forceHOMEMenuTIDPatch, sizeof(forceHOMEMenuTIDPatch), 1
+				);
+			}
+			
             u32 cpuSetting = MULTICONFIG(1);
 
             if(cpuSetting)
