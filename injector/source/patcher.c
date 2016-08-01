@@ -356,15 +356,17 @@ void patchCode(u64 progId, u8 *code, u32 size)
             static const u8 blockAutoUpdatesPatch[] = {
                 0xE3, 0xA0
             };
-
-            //Block silent auto-updates
-            patchMemory(code, size, 
-                blockAutoUpdatesPattern, 
-                sizeof(blockAutoUpdatesPattern), 0, 
-                blockAutoUpdatesPatch, 
-                sizeof(blockAutoUpdatesPatch), 1
-            );
-
+			
+			if(CONFIG(7)){
+				//Block silent auto-updates
+				patchMemory(code, size, 
+					blockAutoUpdatesPattern, 
+					sizeof(blockAutoUpdatesPattern), 0, 
+					blockAutoUpdatesPatch, 
+					sizeof(blockAutoUpdatesPatch), 1
+				);
+			}
+			
             //Apply only if the updated NAND hasn't been booted
             if((BOOTCONFIG(0, 3) != 0) == (BOOTCONFIG(2, 1) && CONFIG(1)))
             {
@@ -376,12 +378,14 @@ void patchCode(u64 progId, u8 *code, u32 size)
                 };
 
                 //Skip update checks to access the EShop
-                patchMemory(code, size, 
-                    skipEshopUpdateCheckPattern, 
-                    sizeof(skipEshopUpdateCheckPattern), 0, 
-                    skipEshopUpdateCheckPatch, 
-                    sizeof(skipEshopUpdateCheckPatch), 1
-                );
+				if(CONFIG(7)){
+					patchMemory(code, size, 
+						skipEshopUpdateCheckPattern, 
+						sizeof(skipEshopUpdateCheckPattern), 0, 
+						skipEshopUpdateCheckPatch, 
+						sizeof(skipEshopUpdateCheckPatch), 1
+					);
+				}
             }
 
             break;
@@ -438,7 +442,7 @@ void patchCode(u64 progId, u8 *code, u32 size)
                 0x0B, 0x18, 0x21, 0xC8
             };
 			
-			if(CONFIG(6)) {
+			if(CONFIG(6) | CONFIG(7)){ //bitwise OR given the nature of the CONFIG macro
 				//Disable updates from foreign carts (makes carts region-free)
 				patchMemory(code, size, 
 					stopCartUpdatesPattern, 
@@ -478,29 +482,28 @@ void patchCode(u64 progId, u8 *code, u32 size)
                 0x00, 0x26
             };
 
-            //Disable SecureInfo signature check
-            patchMemory(code, size, 
-                secureinfoSigCheckPattern, 
-                sizeof(secureinfoSigCheckPattern), 0, 
-                secureinfoSigCheckPatch, 
-                sizeof(secureinfoSigCheckPatch), 1
-            );
+			//Disable SecureInfo signature check
+			patchMemory(code, size, 
+				secureinfoSigCheckPattern, 
+				sizeof(secureinfoSigCheckPattern), 0, 
+				secureinfoSigCheckPatch, 
+				sizeof(secureinfoSigCheckPatch), 1
+			);
 
-            if(secureInfoExists())
-            {
-                static const u16 secureinfoFilenamePattern[] = u"SecureInfo_";
-                static const u16 secureinfoFilenamePatch[] = u"C";
+			if(secureInfoExists())
+			{
+				static const u16 secureinfoFilenamePattern[] = u"SecureInfo_";
+				static const u16 secureinfoFilenamePatch[] = u"C";
 
-                //Use SecureInfo_C
-                patchMemory(code, size, 
-                    secureinfoFilenamePattern, 
-                    sizeof(secureinfoFilenamePattern) - sizeof(u16),
-                    sizeof(secureinfoFilenamePattern) - sizeof(u16), 
-                    secureinfoFilenamePatch, 
-                    sizeof(secureinfoFilenamePatch) - sizeof(u16), 2
-                );
-            }
-
+				//Use SecureInfo_C
+				patchMemory(code, size, 
+					secureinfoFilenamePattern, 
+					sizeof(secureinfoFilenamePattern) - sizeof(u16),
+					sizeof(secureinfoFilenamePattern) - sizeof(u16), 
+					secureinfoFilenamePatch, 
+					sizeof(secureinfoFilenamePatch) - sizeof(u16), 2
+				);
+			}
             break;
         }
         
