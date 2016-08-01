@@ -481,30 +481,32 @@ void patchCode(u64 progId, u8 *code, u32 size)
             static const u8 secureinfoSigCheckPatch[] = {
                 0x00, 0x26
             };
-
-			//Disable SecureInfo signature check
-			patchMemory(code, size, 
-				secureinfoSigCheckPattern, 
-				sizeof(secureinfoSigCheckPattern), 0, 
-				secureinfoSigCheckPatch, 
-				sizeof(secureinfoSigCheckPatch), 1
-			);
-
-			if(secureInfoExists())
-			{
-				static const u16 secureinfoFilenamePattern[] = u"SecureInfo_";
-				static const u16 secureinfoFilenamePatch[] = u"C";
-
-				//Use SecureInfo_C
+			
+			if(CONFIG(8)){
+				//Disable SecureInfo signature check
 				patchMemory(code, size, 
-					secureinfoFilenamePattern, 
-					sizeof(secureinfoFilenamePattern) - sizeof(u16),
-					sizeof(secureinfoFilenamePattern) - sizeof(u16), 
-					secureinfoFilenamePatch, 
-					sizeof(secureinfoFilenamePatch) - sizeof(u16), 2
+					secureinfoSigCheckPattern, 
+					sizeof(secureinfoSigCheckPattern), 0, 
+					secureinfoSigCheckPatch, 
+					sizeof(secureinfoSigCheckPatch), 1
 				);
+
+				if(secureInfoExists())
+				{
+					static const u16 secureinfoFilenamePattern[] = u"SecureInfo_";
+					static const u16 secureinfoFilenamePatch[] = u"C";
+
+					//Use SecureInfo_C
+					patchMemory(code, size, 
+						secureinfoFilenamePattern, 
+						sizeof(secureinfoFilenamePattern) - sizeof(u16),
+						sizeof(secureinfoFilenamePattern) - sizeof(u16), 
+						secureinfoFilenamePatch, 
+						sizeof(secureinfoFilenamePatch) - sizeof(u16), 2
+					);
+				}
 			}
-            break;
+			break;
         }
         
         case 0x0004013000003702LL: // RO

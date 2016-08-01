@@ -45,7 +45,8 @@ void configureCFW(const char *configPath)
                                         "( ) Show current NAND in System Settings",
                                         "( ) Show GBA boot screen in patched AGB_FIRM",
                                         "( ) Region free",
-										"( ) Try to block mandatory updates"};
+										"( ) Try to block mandatory updates",
+										"( ) SecureInfo: sigpatch + use _C if available"};
 
     struct multiOption {
         int posXs[4];
