@@ -46,7 +46,8 @@ void configureCFW(const char *configPath)
                                         "( ) Show GBA boot screen in patched AGB_FIRM",
                                         "( ) Region free",
 										"( ) Try to block mandatory updates",
-										"( ) SecureInfo: sigpatch + use _C if available"};
+										"( ) SecureInfo: sigpatch + use _C if available",
+										"( ) Verbose errors (ErrDisp)"};
 
     struct multiOption {
         int posXs[4];
